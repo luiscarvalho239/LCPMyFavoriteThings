@@ -1,0 +1,106 @@
+﻿@page "/editjogo/{id:int}"
+@using MyFavoriteThings.Data;
+@using MyFavoriteThings.Classes;
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+
+<h3>Editar Jogo</h3>
+<hr />
+
+<EditForm Model="@jogo" OnValidSubmit="EditarJogo">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="row">
+        <div class="col-12">
+            <div class="form-group">
+                <label for="Titulo" class="custom-control-label">Titulo</label>
+                <InputText @bind-Value="@jogo.Titulo" class="form-control" />
+                <ValidationMessage For="@(() => jogo.Titulo)" />
+            </div>
+            <div class="form-group">
+                <label for="Desc" class="custom-control-label">Desc</label>
+                <InputTextArea @bind-Value="@jogo.Desc" class="form-control" cols="1" rows="8" />
+                <ValidationMessage For="@(() => jogo.Desc)" />
+            </div>
+            <div class="form-group">
+                <label for="Capa" class="custom-control-label">Capa</label>
+                <InputText @bind-Value="@jogo.Capa" class="form-control" />
+                <ValidationMessage For="@(() => jogo.Capa)" />
+
+                <div class="form-group mt-3">
+                    <label>Enable image preview</label>
+                    <input type="checkbox" @onchange="imgPreview" />
+                    @if (isHidden)
+                    {
+                        <img src="@jogo.Capa" class="d-block img-fluid mt-2" />
+                    }
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="DataLancamento" class="custom-control-label">DataLancamento</label>
+                <InputDateTime @bind-Value="@jogo.DataLancamento" class="form-control" />
+                <ValidationMessage For="@(() => jogo.DataLancamento)" />
+            </div>
+            <div class="form-group">
+                <label for="Genero" class="custom-control-label">Genero</label>
+                <InputText @bind-Value="@jogo.Genero" class="form-control" />
+                <ValidationMessage For="@(() => jogo.Genero)" />
+            </div>
+            <div class="form-group">
+                <label for="Empresa" class="custom-control-label">Empresa</label>
+                <InputText @bind-Value="@jogo.Empresa" class="form-control" />
+                <ValidationMessage For="@(() => jogo.Empresa)" />
+            </div>
+            <div class="form-group">
+                <label for="Editor" class="custom-control-label">Editor</label>
+                <InputText @bind-Value="@jogo.Editor" class="form-control" />
+                <ValidationMessage For="@(() => jogo.Editor)" />
+            </div>
+            <div class="form-group">
+                <label for="IsYourFavorite" class="custom-control-label">Marcar isto como favorito?</label>
+                <InputCheckbox @bind-Value="@jogo.IsYourFavorite" />
+                @*<ValidationMessage For="@(() => jogo.IsYourFavorite)" />*@
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <input type="submit" class="btn btn-primary" value="Salvar" />
+                <input type="reset" class="btn btn-primary" value="Limpar" />
+                <input type="button" class="btn btn-primary" @onclick="@Cancel" value="Cancelar" />
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    public bool isHidden { get; set; }
+
+    Jogo jogo = new Jogo();
+
+    protected override async Task OnInitializedAsync()
+    {
+        jogo = await http.GetJsonAsync<Jogo>("/api/jogos/" + id);
+    }
+
+    protected async Task EditarJogo()
+    {
+        await http.PutJsonAsync("/api/jogos/" + id, jogo);
+        NavigationManager.NavigateTo("jogos");
+    }
+
+    void imgPreview()
+    {
+        isHidden = !isHidden;
+    }
+
+    void Cancel()
+    {
+        NavigationManager.NavigateTo("jogos");
+    }
+}

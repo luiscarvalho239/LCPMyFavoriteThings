@@ -1,0 +1,81 @@
+﻿@page "/addjogo"
+@using MyFavoriteThings.Data;
+@using MyFavoriteThings.Classes;
+@inject HttpClient  http
+@inject NavigationManager NavigationManager
+
+<h3>AddJogo</h3>
+<hr />
+<EditForm Model="@jogo" OnValidSubmit="CreateJogo">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="row">
+        <div class="col-12">
+            <div class="form-group">
+                <label for="Titulo" class="custom-control-label">Titulo</label>
+                <InputText @bind-Value="@jogo.Titulo" class="form-control" />
+                <ValidationMessage For="@(() => jogo.Titulo)" />
+            </div>
+            <div class="form-group">
+                <label for="Desc" class="custom-control-label">Desc</label>
+                <InputTextArea @bind-Value="@jogo.Desc" class="form-control" />
+                <ValidationMessage For="@(() => jogo.Desc)" />
+            </div>
+            <div class="form-group">
+                <label for="Capa" class="custom-control-label">Capa</label>
+                <InputText @bind-Value="@jogo.Capa" class="form-control" />
+                <ValidationMessage For="@(() => jogo.Capa)" />
+            </div>
+            <div class="form-group">
+                <label for="DataLancamento" class="custom-control-label">DataLancamento</label>
+                <InputDateTime @bind-Value="@jogo.DataLancamento" class="form-control" />
+                <ValidationMessage For="@(() => jogo.DataLancamento)" />
+            </div>
+            <div class="form-group">
+                <label for="Genero" class="custom-control-label">Genero</label>
+                <InputText @bind-Value="@jogo.Genero" class="form-control" />
+                <ValidationMessage For="@(() => jogo.Genero)" />
+            </div>
+            <div class="form-group">
+                <label for="Empresa" class="custom-control-label">Empresa</label>
+                <InputText @bind-Value="@jogo.Empresa" class="form-control" />
+                <ValidationMessage For="@(() => jogo.Empresa)" />
+            </div>
+            <div class="form-group">
+                <label for="Editor" class="custom-control-label">Editor</label>
+                <InputText @bind-Value="@jogo.Editor" class="form-control" />
+                <ValidationMessage For="@(() => jogo.Editor)" />
+            </div>
+            <div class="form-group">
+                <label for="IsYourFavorite" class="custom-control-label">Marcar isto como favorito?</label>
+                <InputCheckbox @bind-Value="@jogo.IsYourFavorite" />
+                @*<ValidationMessage For="@(() => jogo.IsYourFavorite)" />*@
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <input type="submit" class="btn btn-primary" value="Salvar" />
+                <input type="reset" class="btn btn-primary" value="Limpar" />
+                <input type="button" class="btn btn-primary" @onclick="@Cancel" value="Cancelar" />
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    Jogo jogo = new Jogo();
+
+    protected async Task CreateJogo()
+    {
+        await http.PostJsonAsync("/api/jogos", jogo);
+        NavigationManager.NavigateTo("jogos");
+    }
+
+    void Cancel()
+    {
+        NavigationManager.NavigateTo("jogos");
+    }
+}
