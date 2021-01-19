@@ -1,0 +1,160 @@
+﻿@page "/jogos"
+@using MyFavoriteThings.Data.Models;
+@using Microsoft.AspNetCore.WebUtilities;
+@using MyFavoriteThings.Helpers;
+@using System.Linq;
+@inject HttpClient  http
+@inject NavigationManager navManager
+
+<h3>Jogos</h3>
+
+<p class="mt-3">
+    <a href="/addjogo" class="btn btn-primary">Criar Novo Jogo</a>
+</p>
+
+@if (jogos == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="d-block mt-3 mb-3">
+        <button class="btn btn-primary btntypetable" id="btntypetable" @onclick='(() => changeType("table"))'>Table</button>
+        <button class="btn btn-primary btntypecard" id="btntypecard" @onclick='(() => changeType("card"))'>Card</button>
+    </div>
+
+    if (type == "card")
+    {
+        <div class="f-container">
+            <div class="row justify-content-center align-items-center">
+                @foreach (var jogo in jogos)
+                {
+                    <div class="col-12 col-md-6 col-lg-6 col-xl-4 card p-0">
+                        <a href="@jogo.Capa" target="_blank">
+                            <img src="@jogo.Capa" class="card-img-top mx-auto" alt="@jogo.Titulo" />
+                        </a>
+                        <div class="card-body">
+                            <h3 class="text-center">@jogo.Titulo (id: @jogo.JogoId)</h3>
+                            <p class="text-center">Data de lançamento: @jogo.DataLancamento.ToShortDateString()</p>
+                            <p class="text-center">Favorito: @jogo.IsYourFavorite</p>
+                            <div class="d-block mx-auto text-center mt-3">
+                                <a href='/editjogo/@jogo.JogoId' class="btn btn-primary">Editar</a>
+                                <a href='/deletejogo/@jogo.JogoId' class="btn btn-danger">Apagar</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="srchblk mb-3">
+            <h3>Procurar</h3>
+            <div class="row">
+                <div class="col-6">
+                    <select class="custom-select" @bind="selectedValue">
+                        <option value="JogoId">JogoId</option>
+                        <option value="Titulo">Titulo</option>
+                    </select>
+                </div>
+
+                <div class="col-6">
+                    <input type="text" class="form-control" @oninput="@OnSearchChanged" />
+                </div>
+
+                <div class="clearfix"></div>
+            </div>
+         </div>
+
+        <div class="table-responsive">
+            <table class='table'>
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Titulo</th>
+                        <th>Capa</th>
+                        <th>Data de Lançamento</th>
+                        <th>Favorito</th>
+                        <th>CRUD Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var jogo in jogos)
+                    {
+                    <tr>
+                        <td>@jogo.JogoId</td>
+                        <td>@jogo.Titulo</td>
+                        <td>@jogo.Capa</td>
+                        <td>@jogo.DataLancamento</td>
+                        <td>@jogo.IsYourFavorite</td>
+                        <td>
+                            <a href='/editjogo/@jogo.JogoId' class="btn btn-primary">Editar</a>
+                            <a href='/deletejogo/@jogo.JogoId' class="btn btn-danger">Apagar</a>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
+@code {
+    public string type { get; set; } = "table";
+    string selectedValue { get; set; } = "Titulo";
+
+    Jogo[] jogos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        jogos = await http.GetJsonAsync<Jogo[]>("/api/jogos");
+        type = getType();
+    }
+
+    void changeType(string typestr)
+    {
+        var query = new Dictionary<string, string> {
+            { "type", typestr }
+        };
+        type = query["type"];
+        navManager.NavigateTo(QueryHelpers.AddQueryString("/jogos", query));
+    }
+
+    public string getType()
+    {
+        return ExtensionMethods.QueryString(navManager, "type");
+    }
+
+    async Task OnSearchChanged(ChangeEventArgs args)
+    {
+        string values = args.Value.ToString();
+        await jogosFilteringList(values, selectedValue);
+    }
+
+    protected async Task jogosFilteringList(string value, string columnName)
+    {
+        jogos = await http.GetJsonAsync<Jogo[]>("/api/jogos/");
+
+        if (value.Trim().Length > 0)
+        {
+            switch (columnName)
+            {
+                case "JogoId":
+                    jogos = jogos.Where(x => x.JogoId == int.Parse(value)).ToArray();
+                    break;
+                case "Titulo":
+                    jogos = jogos.Where(x => x.Titulo.Contains(value)).ToArray();
+                    break;
+                default:
+                    jogos = await http.GetJsonAsync<Jogo[]>("/api/jogos/");
+                    break;
+            }
+        }
+        else
+        {
+            jogos = await http.GetJsonAsync<Jogo[]>("/api/jogos/");
+        }
+    }
+}

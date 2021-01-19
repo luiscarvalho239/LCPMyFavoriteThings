@@ -1,0 +1,74 @@
+﻿@page "/addtutorial"
+@using MyFavoriteThings.Data.Models;
+@inject HttpClient  http
+@inject NavigationManager NavigationManager
+
+<h3>Adicionar novo tutorial</h3>
+<hr />
+<EditForm Model="@tutoriais" OnValidSubmit="Createtutoriais">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="row">
+        <div class="col-12">
+            <div class="form-group">
+                <label for="Titulo" class="custom-control-label">Titulo</label>
+                <InputText @bind-Value="@tutoriais.Titulo" class="form-control" />
+                <ValidationMessage For="@(() => tutoriais.Titulo)" />
+            </div>
+            <div class="form-group">
+                <label for="Texto" class="custom-control-label">Texto</label>
+                <InputTextArea @bind-Value="@tutoriais.Texto" class="form-control" />
+                <ValidationMessage For="@(() => tutoriais.Texto)" />
+            </div>
+            <div class="form-group">
+                <label for="Capa" class="custom-control-label">Capa</label>
+                <InputText @bind-Value="@tutoriais.Capa" class="form-control" />
+                <ValidationMessage For="@(() => tutoriais.Capa)" />
+            </div>
+            <div class="form-group">
+                <label for="Categoria" class="custom-control-label">Categoria</label>
+                <InputText @bind-Value="@tutoriais.Categoria" class="form-control" />
+                <ValidationMessage For="@(() => tutoriais.Categoria)" />
+            </div>
+            <div class="form-group">
+                <label for="Url" class="custom-control-label">Url</label>
+                <InputText @bind-Value="@tutoriais.Url" class="form-control" />
+                <ValidationMessage For="@(() => tutoriais.Url)" />
+            </div>
+            <div class="form-group">
+                <label for="Classificacao" class="custom-control-label">Classificação</label>
+                <InputNumber @bind-Value="@tutoriais.Classificacao" class="form-control" />
+                <ValidationMessage For="@(() => tutoriais.Classificacao)" />
+            </div>
+            <div class="form-group">
+                <label for="IsYourFavorite" class="custom-control-label">Marcar isto como favorito?</label>
+                <InputCheckbox @bind-Value="@tutoriais.IsYourFavorite" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <input type="submit" class="btn btn-primary" value="Salvar" />
+                <input type="reset" class="btn btn-primary" value="Limpar" />
+                <input type="button" class="btn btn-primary" @onclick="@Cancel" value="Cancelar" />
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    Tutorial tutoriais = new Tutorial();
+
+    protected async Task Createtutoriais()
+    {
+        await http.PostJsonAsync("/api/tutoriais", tutoriais);
+        NavigationManager.NavigateTo("tutoriais");
+    }
+
+    void Cancel()
+    {
+        NavigationManager.NavigateTo("tutoriais");
+    }
+}

@@ -1,14 +1,14 @@
-﻿@page "/deletejogo/{id:int}"
-@using MyFavoriteThings.Data;
+﻿@page "/deletefilme/{id:int}"
+@using MyFavoriteThings.Data.Models;
 @inject HttpClient http
 @inject NavigationManager NavigationManager
 @inject IWebHostEnvironment Env
 
-<h3>Apagar Jogo</h3>
+<h3>Apagar filme</h3>
 <hr />
 
 <h2>Confirma Exclusão ?</h2>
-<p>Deseja realmente deletar este jogo com Id: <b> @id</b></p>
+<p>Deseja realmente deletar este filme com Id: <b> @id</b></p>
 <br />
 <Aviso Exibir="Exibir">
     <strong>@Mensagem</strong>
@@ -17,15 +17,15 @@
     <table class="table">
         <tr>
             <td>Titulo</td>
-            <td>@jogo.Titulo</td>
+            <td>@filme.Titulo</td>
         </tr>
         <tr>
             <td>Capa</td>
-            <td>@jogo.Capa</td>
+            <td>@filme.Capa</td>
         </tr>
         <tr>
             <td>Data de Lançamento</td>
-            <td>@jogo.DataLancamento</td>
+            <td>@filme.DataLancamento</td>
         </tr>
     </table>
     <div class="form-group">
@@ -43,13 +43,13 @@
     [Parameter]
     public int id { get; set; }
 
-    Jogo jogo = new Jogo();
+    Filme filme = new Filme();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            jogo = await http.GetJsonAsync<Jogo>("/api/jogos/" + id);
+            filme = await http.GetJsonAsync<Filme>("/api/filmes/" + id);
         }
         catch (Exception ex)
         {
@@ -60,7 +60,7 @@
             }
             else
             {
-                Mensagem = "Não foi possível acessar o jogo ...";
+                Mensagem = "Não foi possível acessar o filme ...";
             }
         }
     }
@@ -68,8 +68,8 @@
     {
         try
         {
-            await http.DeleteAsync("/api/jogos/" + id);
-            NavigationManager.NavigateTo("jogos");
+            await http.DeleteAsync("/api/filmes/" + id);
+            NavigationManager.NavigateTo("filmes");
         }
         catch (Exception ex)
         {
@@ -80,12 +80,12 @@
             }
             else
             {
-                Mensagem = "Não foi possível excluir o jogo ...";
+                Mensagem = "Não foi possível excluir o filme ...";
             }
         }
     }
     void Cancel()
     {
-        NavigationManager.NavigateTo("jogos");
+        NavigationManager.NavigateTo("filmes");
     }
 }

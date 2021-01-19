@@ -2,11 +2,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MyFavoriteThings.Data
+namespace MyFavoriteThings.Data.Models
 {
     public class Jogo
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key]
         public int JogoId { get; set; }
 
         [Required(ErrorMessage = "O titulo do jogo é obrigatório")]

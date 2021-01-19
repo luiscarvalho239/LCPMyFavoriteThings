@@ -1,0 +1,85 @@
+﻿@page "/addmusica"
+@using MyFavoriteThings.Data.Models;
+@using MyFavoriteThings.Classes;
+@inject HttpClient  http
+@inject NavigationManager NavigationManager
+
+<h3>Adicionar nova música</h3>
+<hr />
+<EditForm Model="@musica" OnValidSubmit="Createmusica">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="row">
+        <div class="col-12">
+            <div class="form-group">
+                <label for="Titulo" class="custom-control-label">Titulo</label>
+                <InputText @bind-Value="@musica.Titulo" class="form-control" />
+                <ValidationMessage For="@(() => musica.Titulo)" />
+            </div>
+            <div class="form-group">
+                <label for="Desc" class="custom-control-label">Desc</label>
+                <InputTextArea @bind-Value="@musica.Desc" class="form-control" />
+                <ValidationMessage For="@(() => musica.Desc)" />
+            </div>
+            <div class="form-group">
+                <label for="Capa" class="custom-control-label">Capa</label>
+                <InputText @bind-Value="@musica.Capa" class="form-control" />
+                <ValidationMessage For="@(() => musica.Capa)" />
+            </div>
+            <div class="form-group">
+                <label for="Genero" class="custom-control-label">Genero</label>
+                <InputText @bind-Value="@musica.Genero" class="form-control" />
+                <ValidationMessage For="@(() => musica.Genero)" />
+            </div>
+            <div class="form-group">
+                <label for="DataLancamento" class="custom-control-label">DataLancamento</label>
+                <InputDateTime @bind-Value="@musica.DataLancamento" class="form-control" />
+                <ValidationMessage For="@(() => musica.DataLancamento)" />
+            </div>
+            <div class="form-group">
+                <label for="Url" class="custom-control-label">Url</label>
+                <InputText @bind-Value="@musica.Url" class="form-control" />
+                <ValidationMessage For="@(() => musica.Url)" />
+            </div>
+            <div class="form-group">
+                <label for="Idade" class="custom-control-label">Idade</label>
+                <InputText @bind-Value="@musica.Idade" class="form-control" />
+                <ValidationMessage For="@(() => musica.Idade)" />
+            </div>
+            <div class="form-group">
+                <label for="Classificacao" class="custom-control-label">Classificação</label>
+                <InputNumber @bind-Value="@musica.Classificacao" class="form-control" />
+                <ValidationMessage For="@(() => musica.Classificacao)" />
+            </div>
+            <div class="form-group">
+                <label for="IsYourFavorite" class="custom-control-label">Marcar isto como favorito?</label>
+                <InputCheckbox @bind-Value="@musica.IsYourFavorite" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <input type="submit" class="btn btn-primary" value="Salvar" />
+                <input type="reset" class="btn btn-primary" value="Limpar" />
+                <input type="button" class="btn btn-primary" @onclick="@Cancel" value="Cancelar" />
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    Música musica = new Música();
+
+    protected async Task Createmusica()
+    {
+        await http.PostJsonAsync("/api/musicas", musica);
+        NavigationManager.NavigateTo("musicas");
+    }
+
+    void Cancel()
+    {
+        NavigationManager.NavigateTo("musicas");
+    }
+}

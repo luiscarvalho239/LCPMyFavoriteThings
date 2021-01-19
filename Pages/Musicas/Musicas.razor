@@ -1,18 +1,18 @@
-﻿@page "/jogos"
-@using MyFavoriteThings.Data;
+﻿@page "/musicas"
+@using MyFavoriteThings.Data.Models;
 @using Microsoft.AspNetCore.WebUtilities;
 @using MyFavoriteThings.Helpers;
 @using System.Linq;
 @inject HttpClient  http
 @inject NavigationManager navManager
 
-<h3>Jogos</h3>
+<h3>Músicas</h3>
 
 <p class="mt-3">
-    <a href="/addjogo" class="btn btn-primary">Criar Novo Jogo</a>
+    <a href="/addmusica" class="btn btn-primary">Criar Nova Música</a>
 </p>
 
-@if (jogos == null)
+@if (musicas == null)
 {
     <p>Loading...</p>
 }
@@ -27,19 +27,19 @@ else
     {
         <div class="f-container">
             <div class="row justify-content-center align-items-center">
-                @foreach (var jogo in jogos)
+                @foreach (var musica in musicas)
                 {
                     <div class="col-12 col-md-6 col-lg-6 col-xl-4 card p-0">
-                        <a href="@jogo.Capa" target="_blank">
-                            <img src="@jogo.Capa" class="card-img-top mx-auto" alt="@jogo.Titulo" />
+                        <a href="@musica.Capa" target="_blank">
+                            <img src="@musica.Capa" class="card-img-top mx-auto" alt="@musica.Titulo" />
                         </a>
                         <div class="card-body">
-                            <h3 class="text-center">@jogo.Titulo (id: @jogo.JogoId)</h3>
-                            <p class="text-center">Data de lançamento: @jogo.DataLancamento.ToShortDateString()</p>
-                            <p class="text-center">Favorito: @jogo.IsYourFavorite</p>
+                            <h3 class="text-center">@musica.Titulo (id: @musica.MusicaId)</h3>
+                            <p class="text-center">Data de lançamento: @musica.DataLancamento.ToShortDateString()</p>
+                            <p class="text-center">Favorito: @musica.IsYourFavorite</p>
                             <div class="d-block mx-auto text-center mt-3">
-                                <a href='/editjogo/@jogo.JogoId' class="btn btn-primary">Editar</a>
-                                <a href='/deletejogo/@jogo.JogoId' class="btn btn-danger">Apagar</a>
+                                <a href='/editmusica/@musica.MusicaId' class="btn btn-primary">Editar</a>
+                                <a href='/deletemusica/@musica.MusicaId' class="btn btn-danger">Apagar</a>
                             </div>
                         </div>
                     </div>
@@ -55,7 +55,7 @@ else
             <div class="row">
                 <div class="col-6">
                     <select class="custom-select" @bind="selectedValue">
-                        <option value="JogoId">JogoId</option>
+                        <option value="MusicaId">MusicaId</option>
                         <option value="Titulo">Titulo</option>
                     </select>
                 </div>
@@ -66,7 +66,7 @@ else
 
                 <div class="clearfix"></div>
             </div>
-         </div>
+        </div>
 
         <div class="table-responsive">
             <table class='table'>
@@ -81,19 +81,19 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var jogo in jogos)
+                    @foreach (var musica in musicas)
                     {
-                    <tr>
-                        <td>@jogo.JogoId</td>
-                        <td>@jogo.Titulo</td>
-                        <td>@jogo.Capa</td>
-                        <td>@jogo.DataLancamento</td>
-                        <td>@jogo.IsYourFavorite</td>
-                        <td>
-                            <a href='/editjogo/@jogo.JogoId' class="btn btn-primary">Editar</a>
-                            <a href='/deletejogo/@jogo.JogoId' class="btn btn-danger">Apagar</a>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>@musica.MusicaId</td>
+                            <td>@musica.Titulo</td>
+                            <td>@musica.Capa</td>
+                            <td>@musica.DataLancamento</td>
+                            <td>@musica.IsYourFavorite</td>
+                            <td>
+                                <a href='/editmusica/@musica.MusicaId' class="btn btn-primary">Editar</a>
+                                <a href='/deletemusica/@musica.MusicaId' class="btn btn-danger">Apagar</a>
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </table>
@@ -105,11 +105,11 @@ else
     public string type { get; set; } = "table";
     string selectedValue { get; set; } = "Titulo";
 
-    Jogo[] jogos;
+    Música[] musicas;
 
     protected override async Task OnInitializedAsync()
     {
-        jogos = await http.GetJsonAsync<Jogo[]>("/api/jogos");
+        musicas = await http.GetJsonAsync<Música[]>("/api/musicas");
         type = getType();
     }
 
@@ -119,7 +119,7 @@ else
             { "type", typestr }
         };
         type = query["type"];
-        navManager.NavigateTo(QueryHelpers.AddQueryString("/jogos", query));
+        navManager.NavigateTo(QueryHelpers.AddQueryString("/musicas", query));
     }
 
     public string getType()
@@ -130,31 +130,31 @@ else
     async Task OnSearchChanged(ChangeEventArgs args)
     {
         string values = args.Value.ToString();
-        await jogosFilteringList(values, selectedValue);
+        await musicasFilteringList(values, selectedValue);
     }
 
-    protected async Task jogosFilteringList(string value, string columnName)
+    protected async Task musicasFilteringList(string value, string columnName)
     {
-        jogos = await http.GetJsonAsync<Jogo[]>("/api/jogos/");
+        musicas = await http.GetJsonAsync<Música[]>("/api/musicas/");
 
         if (value.Trim().Length > 0)
         {
             switch (columnName)
             {
-                case "JogoId":
-                    jogos = jogos.Where(x => x.JogoId == int.Parse(value)).ToArray();
+                case "MusicaId":
+                    musicas = musicas.Where(x => x.MusicaId == int.Parse(value)).ToArray();
                     break;
                 case "Titulo":
-                    jogos = jogos.Where(x => x.Titulo.Contains(value)).ToArray();
+                    musicas = musicas.Where(x => x.Titulo.Contains(value)).ToArray();
                     break;
                 default:
-                    jogos = await http.GetJsonAsync<Jogo[]>("/api/jogos/");
+                    musicas = await http.GetJsonAsync<Música[]>("/api/musicas/");
                     break;
             }
         }
         else
         {
-            jogos = await http.GetJsonAsync<Jogo[]>("/api/jogos/");
+            musicas = await http.GetJsonAsync<Música[]>("/api/musicas/");
         }
     }
 }

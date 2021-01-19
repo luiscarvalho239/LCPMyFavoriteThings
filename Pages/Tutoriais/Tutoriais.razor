@@ -1,0 +1,158 @@
+﻿@page "/tutoriais"
+@using MyFavoriteThings.Data.Models;
+@using Microsoft.AspNetCore.WebUtilities;
+@using MyFavoriteThings.Helpers;
+@using System.Linq;
+@inject HttpClient  http
+@inject NavigationManager navManager
+
+<h3>Tutoriais</h3>
+
+<p class="mt-3">
+    <a href="/addtutorial" class="btn btn-primary">Criar Novo Tutorial</a>
+</p>
+
+@if (tutoriais == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="d-block mt-3 mb-3">
+        <button class="btn btn-primary btntypetable" id="btntypetable" @onclick='(() => changeType("table"))'>Table</button>
+        <button class="btn btn-primary btntypecard" id="btntypecard" @onclick='(() => changeType("card"))'>Card</button>
+    </div>
+
+    if (type == "card")
+    {
+        <div class="f-container">
+            <div class="row justify-content-center align-items-center">
+                @foreach (var tutorial in tutoriais)
+                {
+                    <div class="col-12 col-md-6 col-lg-6 col-xl-4 card p-0">
+                        <a href="@tutorial.Capa" target="_blank">
+                            <img src="@tutorial.Capa" class="card-img-top mx-auto" alt="@tutorial.Titulo" />
+                        </a>
+                        <div class="card-body">
+                            <h3 class="text-center">@tutorial.Titulo (id: @tutorial.TutorialId)</h3>
+                            <p class="text-center">Favorito: @tutorial.IsYourFavorite</p>
+                            <div class="d-block mx-auto text-center mt-3">
+                                <a href='/edittutorial/@tutorial.TutorialId' class="btn btn-primary">Editar</a>
+                                <a href='/deletetutorial/@tutorial.TutorialId' class="btn btn-danger">Apagar</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="srchblk mb-3">
+            <h3>Procurar</h3>
+            <div class="row">
+                <div class="col-6">
+                    <select class="custom-select" @bind="selectedValue">
+                        <option value="TutorialId">TutorialId</option>
+                        <option value="Titulo">Titulo</option>
+                    </select>
+                </div>
+
+                <div class="col-6">
+                    <input type="text" class="form-control" @oninput="@OnSearchChanged" />
+                </div>
+
+                <div class="clearfix"></div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class='table'>
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Titulo</th>
+                        <th>Capa</th>
+                        <th>Data de Lançamento</th>
+                        <th>Favorito</th>
+                        <th>CRUD Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var tutorial in tutoriais)
+                    {
+                        <tr>
+                            <td>@tutorial.TutorialId</td>
+                            <td>@tutorial.Titulo</td>
+                            <td>@tutorial.Capa</td>
+                            <td>@tutorial.IsYourFavorite</td>
+                            <td>
+                                <a href='/edittutorial/@tutorial.TutorialId' class="btn btn-primary">Editar</a>
+                                <a href='/deletetutorial/@tutorial.TutorialId' class="btn btn-danger">Apagar</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
+@code {
+    public string type { get; set; } = "table";
+    string selectedValue { get; set; } = "Titulo";
+
+    Tutorial[] tutoriais;
+
+    protected override async Task OnInitializedAsync()
+    {
+        tutoriais = await http.GetJsonAsync<Tutorial[]>("/api/tutoriais");
+        type = getType();
+    }
+
+    void changeType(string typestr)
+    {
+        var query = new Dictionary<string, string> {
+            { "type", typestr }
+        };
+        type = query["type"];
+        navManager.NavigateTo(QueryHelpers.AddQueryString("/tutoriais", query));
+    }
+
+    public string getType()
+    {
+        return ExtensionMethods.QueryString(navManager, "type");
+    }
+
+    async Task OnSearchChanged(ChangeEventArgs args)
+    {
+        string values = args.Value.ToString();
+        await tutoriaisFilteringList(values, selectedValue);
+    }
+
+    protected async Task tutoriaisFilteringList(string value, string columnName)
+    {
+        tutoriais = await http.GetJsonAsync<Tutorial[]>("/api/tutoriais/");
+
+        if (value.Trim().Length > 0)
+        {
+            switch (columnName)
+            {
+                case "TutorialId":
+                    tutoriais = tutoriais.Where(x => x.TutorialId == int.Parse(value)).ToArray();
+                    break;
+                case "Titulo":
+                    tutoriais = tutoriais.Where(x => x.Titulo.Contains(value)).ToArray();
+                    break;
+                default:
+                    tutoriais = await http.GetJsonAsync<Tutorial[]>("/api/tutoriais/");
+                    break;
+            }
+        }
+        else
+        {
+            tutoriais = await http.GetJsonAsync<Tutorial[]>("/api/tutoriais/");
+        }
+    }
+}

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MyFavoriteThings.Data.Models;
 
 namespace MyFavoriteThings.Data
 {
@@ -10,6 +11,11 @@ namespace MyFavoriteThings.Data
         {
         }
         public DbSet<Jogo> Jogos { get; set; }
+        public DbSet<Filme> Filmes { get; set; }
+        public DbSet<Série> Séries { get; set; }
+        public DbSet<Música> Músicas { get; set; }
+        public DbSet<Livro> Livros { get; set; }
+        public DbSet<Tutorial> Tutoriais { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

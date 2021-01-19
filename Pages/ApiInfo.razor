@@ -1,6 +1,5 @@
 ﻿@page "/apiinfo"
-@using MyFavoriteThings.Data;
-@using MyFavoriteThings.Helpers;
+@using MyFavoriteThings.Data.Models;
 @using Newtonsoft.Json;
 @inject HttpClient  http
 @inject NavigationManager navManager
@@ -8,26 +7,77 @@
 <h3>ApiInfo</h3>
 
 <div class="apiinfo mt-3">
-    <button class="btn btn-primary btnshowapiinfo" id="btnshowapiinfo" @onclick="showApiInfo">Mostrar a info da API de Jogos</button>
-    @if (isApiInfoShow)
+    <select id="apilist" class="apilist custom-select" @onchange="((ChangeEventArgs e) => ChangeOpt(e))">
+        @foreach (var aapi in aryapi)
+        {
+            <option value="@aapi.name">@aapi.href</option>
+        }
+    </select>
+    @if (!string.IsNullOrEmpty(selectedValue))
     {
-        <p class="mt-3">Api <a href="/api/jogos" target="_blank">Jogos</a>: </p>
-        <pre class="code mt-3">@(JsonConvert.SerializeObject(jogos, Formatting.Indented))</pre>
+        <p class="mt-3">Api @selectedValue</p>
+        <pre class="code mt-3">@(JsonConvert.SerializeObject(infoobj, Formatting.Indented))</pre>
     }
 </div>
 
 
 @code {
-    bool isApiInfoShow = false;
-    List<Jogo> jogos;
+    class ApiInfoCl
+    {
+        public string name { get; set; }
+        public string href { get; set; }
+    }
+
+    List<ApiInfoCl> aryapi = new List<ApiInfoCl>() {
+        new ApiInfoCl() { name = "Jogos", href = "/api/jogos" },
+        new ApiInfoCl() { name = "Filmes", href = "/api/filmes" },
+        new ApiInfoCl() { name = "Livros", href = "/api/livros" },
+        new ApiInfoCl() { name = "Músicas", href = "/api/musicas" },
+        new ApiInfoCl() { name = "Séries", href = "/api/series" },
+        new ApiInfoCl() { name = "Tutoriais", href = "/api/tutoriais" }
+    };
+
+    string selectedValue { get; set; } = "Jogos";
+    object infoobj;
 
     protected override async Task OnInitializedAsync()
     {
-        jogos = await http.GetJsonAsync<List<Jogo>>("/api/jogos");
+        await GetInfoApi(selectedValue);
     }
 
-    void showApiInfo()
+    async Task<object> GetInfoApi(string selVal)
     {
-        isApiInfoShow = !isApiInfoShow;
+        switch (selVal)
+        {
+            case "Jogos":
+                infoobj = await http.GetJsonAsync<List<Jogo>>("/api/jogos");
+                break;
+            case "Filmes":
+                infoobj = await http.GetJsonAsync<List<Filme>>("/api/filmes");
+                break;
+            case "Livros":
+                infoobj = await http.GetJsonAsync<List<Livro>>("/api/livros");
+                break;
+            case "Músicas":
+                infoobj = await http.GetJsonAsync<List<Música>>("/api/musicas");
+                break;
+            case "Séries":
+                infoobj = await http.GetJsonAsync<List<Série>>("/api/series");
+                break;
+            case "Tutoriais":
+                infoobj = await http.GetJsonAsync<List<Tutorial>>("/api/tutoriais");
+                break;
+            default:
+                infoobj = null;
+                break;
+        }
+
+        return infoobj;
+    }
+
+    async Task ChangeOpt(ChangeEventArgs e)
+    {
+        selectedValue = e.Value.ToString();
+        await GetInfoApi(selectedValue);
     }
 }

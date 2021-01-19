@@ -1,0 +1,91 @@
+﻿@page "/deletemusica/{id:int}"
+@using MyFavoriteThings.Data.Models;
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+@inject IWebHostEnvironment Env
+
+<h3>Apagar musica</h3>
+<hr />
+
+<h2>Confirma Exclusão ?</h2>
+<p>Deseja realmente deletar esta música com Id: <b> @id</b></p>
+<br />
+<Aviso Exibir="Exibir">
+    <strong>@Mensagem</strong>
+</Aviso>
+<div class="col-12">
+    <table class="table">
+        <tr>
+            <td>Titulo</td>
+            <td>@musica.Titulo</td>
+        </tr>
+        <tr>
+            <td>Capa</td>
+            <td>@musica.Capa</td>
+        </tr>
+        <tr>
+            <td>Data de Lançamento</td>
+            <td>@musica.DataLancamento</td>
+        </tr>
+    </table>
+    <div class="form-group">
+        <input type="button" value="Apagar" @onclick="@Delete" class="btn btn-primary" />
+        <input type="button" value="Cancelar" @onclick="@Cancel" class="btn btn-primary" />
+    </div>
+</div>
+
+@code {
+    bool Exibir = false;
+
+    [Parameter]
+    public string Mensagem { get; set; }
+
+    [Parameter]
+    public int id { get; set; }
+
+    Música musica = new Música();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            musica = await http.GetJsonAsync<Música>("/api/musicas/" + id);
+        }
+        catch (Exception ex)
+        {
+            Exibir = true;
+            if (Env.IsDevelopment())
+            {
+                Mensagem = "Erro ao acessar os dados ...\n" + ex.StackTrace.ToString();
+            }
+            else
+            {
+                Mensagem = "Não foi possível acessar a música ...";
+            }
+        }
+    }
+    protected async Task Delete()
+    {
+        try
+        {
+            await http.DeleteAsync("/api/musicas/" + id);
+            NavigationManager.NavigateTo("musicas");
+        }
+        catch (Exception ex)
+        {
+            Exibir = true;
+            if (Env.IsDevelopment())
+            {
+                Mensagem = "Erro ao acessar os dados ...\n" + ex.StackTrace.ToString();
+            }
+            else
+            {
+                Mensagem = "Não foi possível excluir a música ...";
+            }
+        }
+    }
+    void Cancel()
+    {
+        NavigationManager.NavigateTo("musicas");
+    }
+}

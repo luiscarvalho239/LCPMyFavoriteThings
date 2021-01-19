@@ -1,0 +1,87 @@
+﻿@page "/deletetutorial/{id:int}"
+@using MyFavoriteThings.Data.Models;
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+@inject IWebHostEnvironment Env
+
+<h3>Apagar tutorial</h3>
+<hr />
+
+<h2>Confirma Exclusão ?</h2>
+<p>Deseja realmente deletar este tutorial com Id: <b> @id</b></p>
+<br />
+<Aviso Exibir="Exibir">
+    <strong>@Mensagem</strong>
+</Aviso>
+<div class="col-12">
+    <table class="table">
+        <tr>
+            <td>Titulo</td>
+            <td>@tutoriais.Titulo</td>
+        </tr>
+        <tr>
+            <td>Capa</td>
+            <td>@tutoriais.Capa</td>
+        </tr>
+    </table>
+    <div class="form-group">
+        <input type="button" value="Apagar" @onclick="@Delete" class="btn btn-primary" />
+        <input type="button" value="Cancelar" @onclick="@Cancel" class="btn btn-primary" />
+    </div>
+</div>
+
+@code {
+    bool Exibir = false;
+
+    [Parameter]
+    public string Mensagem { get; set; }
+
+    [Parameter]
+    public int id { get; set; }
+
+    Tutorial tutoriais = new Tutorial();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            tutoriais = await http.GetJsonAsync<Tutorial>("/api/tutoriais/" + id);
+        }
+        catch (Exception ex)
+        {
+            Exibir = true;
+            if (Env.IsDevelopment())
+            {
+                Mensagem = "Erro ao acessar os dados ...\n" + ex.StackTrace.ToString();
+            }
+            else
+            {
+                Mensagem = "Não foi possível acessar o tutorial ...";
+            }
+        }
+    }
+    protected async Task Delete()
+    {
+        try
+        {
+            await http.DeleteAsync("/api/tutoriais/" + id);
+            NavigationManager.NavigateTo("tutoriais");
+        }
+        catch (Exception ex)
+        {
+            Exibir = true;
+            if (Env.IsDevelopment())
+            {
+                Mensagem = "Erro ao acessar os dados ...\n" + ex.StackTrace.ToString();
+            }
+            else
+            {
+                Mensagem = "Não foi possível excluir o tutorial ...";
+            }
+        }
+    }
+    void Cancel()
+    {
+        NavigationManager.NavigateTo("tutoriais");
+    }
+}
